@@ -50,13 +50,17 @@ def XS_complexity(n, m, q):
 # ===========================================================================================================================
 
 def comparison(cases):
+    results = []
     for n, m, q in cases:
         cost_xl, d_xl = XL_complexity(n, m)
         cost_fxl, k_fxl, d_fxl = FXL_complexity(n, m, q)
         cost_xs, k_xs, s_xs = XS_complexity(n, m, q)
+        results += [(n, m, q, cost_xl, d_xl, cost_fxl, k_fxl, d_fxl, cost_xs, k_xs, s_xs)]
+
         print(f"{n} & {m} & {q} & {math.log2(cost_xl):.1f} & {d_xl} & {math.log2(cost_fxl):.1f} & {k_fxl} & {d_fxl} & {math.log2(cost_xs):.1f} & {k_xs} & {s_xs} \\\\")
+    return results
 
+q = 31
+cases = [(n, n, q) for n in range(8, 31)]
 
-cases = [(15, 15, 31), (15, 15, 65521), (20, 20, 31), (20, 20, 65521), (25, 25, 31), (25, 25, 65521), (30, 30, 31), (30, 30, 65521)]
-
-comparison(cases)
+results = comparison(cases)

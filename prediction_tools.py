@@ -38,12 +38,14 @@ def trivial_syzygies(n, m, d):
     
 # ===========================================================================================================
 
-@cache
 def a_sequences(n, d):
-    if d == 0: return [tuple()]
-    return [a + (i, ) for i in range(n, 0, -1) for a in a_sequences(i, d-1)]
+    if d == 0: 
+        yield tuple()
+    else:
+        for i in range(n, 0, -1):
+            for a in a_sequences(i, d-1):
+                yield a + (i,)
 
-@cache
 def a_index(a, n):
     return math.comb(n + len(a) - 1, len(a)) - sum(math.comb(a_k + (k+1) - 2, (k+1)) for k, a_k in enumerate(a))
 
@@ -72,3 +74,7 @@ def nullity_predictions(n, m, solution=False, max_cols=math.inf):
         if columns - rows + syzygies <= (1 if solution else 0) or columns > max_cols: break
 
     return predictions
+
+def monomial_of_regularity(n, m, solution=False):
+    predictions = nullity_predictions(n, m, solution=solution)
+    return max(predictions.keys())
