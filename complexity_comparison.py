@@ -1,5 +1,5 @@
 import math
-from prediction_tools import *
+from tools.prediction_tools import *
 
 def XL_complexity(n, m):
     dreg = degree_of_regularity(n, m, solution=True)    
@@ -57,10 +57,10 @@ def comparison(cases):
         cost_xs, k_xs, s_xs = XS_complexity(n, m, q)
         results += [(n, m, q, cost_xl, d_xl, cost_fxl, k_fxl, d_fxl, cost_xs, k_xs, s_xs)]
 
-        print(f"{n} & {m} & {q} & {math.log2(cost_xl):.1f} & {d_xl} & {math.log2(cost_fxl):.1f} & {k_fxl} & {d_fxl} & {math.log2(cost_xs):.1f} & {k_xs} & {s_xs} \\\\")
+        print(f"{n} & {m} & {q} & {math.log2(cost_fxl):.1f} & {k_fxl} & {d_fxl} & {math.log2(cost_xs):.1f} & {k_xs} & {s_xs} \\\\")
     return results
 
 q = 31
-cases = [(n, n, q) for n in range(8, 31)]
+cases = [(n, n, q) for n in range(5, 36)]
 
 results = comparison(cases)

@@ -75,6 +75,7 @@ def nullity_predictions(n, m, solution=False, max_cols=math.inf):
 
     return predictions
 
-def monomial_of_regularity(n, m, solution=False):
+def matrix_size_at_monomial_of_regularity(n, m, solution=False):
     predictions = nullity_predictions(n, m, solution=solution)
-    return max(predictions.keys())
+    columns, rows, _ =  predictions[max(predictions.keys())]
+    return columns, rows
