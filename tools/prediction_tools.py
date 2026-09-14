@@ -29,11 +29,11 @@ def macaulay_rank(n, m, d):
 def trivial_syzygies(n, m, d):
     if d < 4 or m <= 0 or n <= 0: return 0
 
-    # Corollary 4.18
+    # Corollary 3
     if d < degree_of_regularity(n, m-1) + 2:
         return hilbert(n, m, d, start=2)
     else:
-        # Corollary 4.16
+        # Corollary 4
         return macaulay_rank(n, m-1, d-2) + trivial_syzygies(n, m-1, d)
     
 # ===========================================================================================================
@@ -46,12 +46,25 @@ def a_sequences(n, d):
             for a in a_sequences(i, d-1):
                 yield a + (i,)
 
+def a_sequence(n, d, i):
+    assert(i <= math.comb(n+d-1,d) and i > 0)    
+    remainder = math.comb(n+d-1,d) - i
+    results = tuple()
+    i = n
+    while len(results) < d and i >= 0:
+        if math.comb(i+d-len(results)-1,d-len(results)) <= remainder:
+            remainder -= math.comb(i+d-len(results)-1,d-len(results))
+            results = (i+1,) + results
+        else:
+            i -= 1
+    return results
+
 def a_index(a, n):
     return math.comb(n + len(a) - 1, len(a)) - sum(math.comb(a_k + (k+1) - 2, (k+1)) for k, a_k in enumerate(a))
 
 # ===========================================================================================================
 
-def nullity_predictions(n, m, solution=False, max_cols=math.inf):
+def nullity_predictions(n, m, solution=False, max_cols=math.inf, fast=False):
     dreg = degree_of_regularity(n, m, solution)
 
     while math.comb(n + dreg - 2, dreg-1) > max_cols:
@@ -61,17 +74,41 @@ def nullity_predictions(n, m, solution=False, max_cols=math.inf):
     ksyz_d = trivial_syzygies(n, m, dreg)
 
     predictions = {}
-    for i, a in enumerate(a_sequences(n, dreg - 2)):
+    # By default, go through all monomials in grevlex order
+    # If fast, the variable factors of the monomial are determined in
+    # sequence, from most significant to least significant
+    if fast and (dreg > 2):
+        tail_a = (n,)
+        while True:
+            a = tuple([ 1 for _ in range(dreg-2-len(tail_a))]) + tail_a
+            columns = a_index((1,1) + a, n)
+            i = a_index(a,n)
+            rows = m * i
 
-        columns = a_index((1,1) + a, n)
-        rows = m * (i+1)
-        # Theorem 4.13
-        syzygies = ksyz_d - sum(trivial_syzygies(a_k - 1, m, (k+1) + 2) for k, a_k in enumerate(a))
+            # Theorem 3
+            syzygies = ksyz_d - sum(trivial_syzygies(a_k - 1, m, (k+1) + 2) for k, a_k in enumerate(a))
 
-        predictions[i+1] = (columns, rows, syzygies)
+            # Corollary 2
+            if columns - rows + syzygies <= (1 if solution else 0) or (columns > max_cols): 
+                if len(tail_a) == dreg-2:
+                    predictions[i] = (columns, rows, syzygies)
+                    break
+                else: tail_a = (tail_a[0],) + tail_a
+            else:
+                tail_a = (tail_a[0]-1,) + tail_a[1:]
+                predictions[i+1] = (columns, rows, syzygies)
+    else:
+        for i, a in enumerate(a_sequences(n, dreg - 2)):
+            columns = a_index((1,1) + a, n)
+            rows = m * (i+1)
+            # Theorem 3
+            syzygies = ksyz_d - sum(trivial_syzygies(a_k - 1, m, (k+1) + 2) for k, a_k in enumerate(a))
 
-        # Corollary 4.14
-        if columns - rows + syzygies <= (1 if solution else 0) or columns > max_cols: break
+            predictions[i+1] = (columns, rows, syzygies)
+
+            # Corollary 2
+            if columns - rows + syzygies <= (1 if solution else 0) or columns > max_cols: 
+                break
 
     return predictions
 
